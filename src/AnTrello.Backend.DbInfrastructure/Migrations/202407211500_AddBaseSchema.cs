@@ -16,7 +16,7 @@ public class AddBaseSchema : Migration
                 password        varchar NOT NULL,
                 break_interval  int default(50),
                 intervals_count int default(10),
-                work_iterval    int default(7),
+                work_interval   int default(7),
                 created_at      timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at      timestamp with time zone
             );
@@ -42,7 +42,7 @@ public class AddBaseSchema : Migration
                 updated_at  timestamp with time zone 
             );
 
-            CREATE TABLE IF NOT EXISTS pomodoro_sessinos (
+            CREATE TABLE IF NOT EXISTS pomodoro_sessions (
                 id              bigserial PRIMARY KEY,
                 total_seconds   bigint NOT NULL,
                 is_completed    boolean NOT NUll default(false),

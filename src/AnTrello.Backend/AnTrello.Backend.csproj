@@ -9,7 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 
@@ -21,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AnTrello.Backend.DbInfrastructure\AnTrello.Backend.DbInfrastructure.csproj" />
+      <ProjectReference Include="..\AnTrello.Backend.Domain\AnTrello.Backend.Domain.csproj" />
     </ItemGroup>
 
 </Project>
