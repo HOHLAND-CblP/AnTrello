@@ -1,0 +1,12 @@
+version: "3"
+services:
+  postgresql:
+    image: postgres
+    restart: always
+    container_name: an_trello-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: an_trello_db
+    ports:
+      - 15432:5432

@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B0F49D65-AF07-4547-92D2-8A776A8D35FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnTrello.Backend", "src\AnTrello.Backend\AnTrello.Backend.csproj", "{2104D15F-699C-4E7D-9538-66200F33D43E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnTrello.Backend.Domain", "src\AnTrello.Backend.Domain\AnTrello.Backend.Domain.csproj", "{49842AD6-544B-4E03-9B74-2C1C1EB265A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnTrello.Backend.DbInfrastructure", "src\AnTrello.Backend.DbInfrastructure\AnTrello.Backend.DbInfrastructure.csproj", "{A2465FFA-F1E9-4E44-B9E9-DF98E178E5B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{58E5B609-4C6B-4C94-91D2-EC95FBA69010}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		docker-compose.yaml = docker-compose.yaml
+		README.md = README.md
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2104D15F-699C-4E7D-9538-66200F33D43E} = {B0F49D65-AF07-4547-92D2-8A776A8D35FA}
+		{49842AD6-544B-4E03-9B74-2C1C1EB265A3} = {B0F49D65-AF07-4547-92D2-8A776A8D35FA}
+		{A2465FFA-F1E9-4E44-B9E9-DF98E178E5B7} = {B0F49D65-AF07-4547-92D2-8A776A8D35FA}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2104D15F-699C-4E7D-9538-66200F33D43E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2104D15F-699C-4E7D-9538-66200F33D43E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2104D15F-699C-4E7D-9538-66200F33D43E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2104D15F-699C-4E7D-9538-66200F33D43E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49842AD6-544B-4E03-9B74-2C1C1EB265A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49842AD6-544B-4E03-9B74-2C1C1EB265A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49842AD6-544B-4E03-9B74-2C1C1EB265A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49842AD6-544B-4E03-9B74-2C1C1EB265A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2465FFA-F1E9-4E44-B9E9-DF98E178E5B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2465FFA-F1E9-4E44-B9E9-DF98E178E5B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2465FFA-F1E9-4E44-B9E9-DF98E178E5B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2465FFA-F1E9-4E44-B9E9-DF98E178E5B7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
