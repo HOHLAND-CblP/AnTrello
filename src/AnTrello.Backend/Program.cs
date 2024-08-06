@@ -54,7 +54,7 @@ class Program
                             context.Fail("Not valid token");
 
                         var tokenType = context.Principal.Claims.First(claim => claim.Type == "type").Value;
-                        if (tokenType != TokenType.Access.ToString().ToLower())
+                        if (tokenType != TokenType.Access.ToString())
                             context.Fail("Not access token");
 
                         var userId = long.Parse(context.Principal.Claims.First(claim => claim.Type == "sid").Value);

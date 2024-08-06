@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,8 @@ using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities;
 using AnTrello.Backend.Domain.Entities.Jwt;
 using AnTrello.Backend.Domain.Settings;
+using JwtConstants = System.IdentityModel.Tokens.Jwt.JwtConstants;
+using Task = AnTrello.Backend.Domain.Entities.Task;
 
 namespace AnTrello.Backend.Domain.Services;
 
@@ -38,25 +41,23 @@ internal class AuthService : IAuthService
         if (!await _userService.VerifyUser(request.Email, request.Password, token))
             throw new AuthenticationException("Wrong login or password");
         
-        var accessToken = GenerateToken(user, _jwtSettings.TokenLifeTimeInSeconds,
+        var accessToken = GenerateToken(user,
             TokenType.Access);
         var refreshToken = new JwtRefreshToken()
         {
-            Token = GenerateToken(user, _jwtSettings.RefreshTokenLifeTimeInSeconds,
+            Token = GenerateToken(user,
                 TokenType.Refresh),
             UserId = user.Id
         };
         
         await _tokenRepository.CreateRefreshToken(refreshToken, token);
         
-        var response = new LoginResponse
+        return new LoginResponse
         {
             User = user,
-            Token = GenerateToken(user, _jwtSettings.TokenLifeTimeInSeconds, TokenType.Access),
-            RefreshToken = GenerateToken(user, _jwtSettings.RefreshTokenLifeTimeInSeconds, TokenType.Refresh)
+            Token = GenerateToken(user, TokenType.Access),
+            RefreshToken = GenerateToken(user, TokenType.Refresh)
         };
-        
-        return response;
     }
 
     public async Task<RegisterResponse> Register(CreateUserRequest request, CancellationToken token)
@@ -67,47 +68,56 @@ internal class AuthService : IAuthService
 
         var createResponse = await _userService.Create(request, token);
 
-        var accessToken = GenerateToken(createResponse.User, _jwtSettings.TokenLifeTimeInSeconds,
-            TokenType.Access);
-        var refreshToken = new JwtRefreshToken()
-        {
-            Token = GenerateToken(createResponse.User, _jwtSettings.RefreshTokenLifeTimeInSeconds,
-                TokenType.Refresh),
-            UserId = createResponse.User.Id
-        };
+        var tokens = await GetNewTokens(createResponse.User, token);
         
-        await _tokenRepository.CreateRefreshToken(refreshToken, token);
-        
-        var response = new RegisterResponse
+        return new RegisterResponse
         {
             User = createResponse.User,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken.Token
+            AccessToken = tokens.AccessToken,
+            RefreshToken = tokens.RefreshToken
         };
-        return response;
     }
 
     public async Task<GetNewTokensResponse> GetNewTokens(string refreshToken, CancellationToken token)
     {
-        var user = await _userService.GetById(1, token);
+        var user = await VerifyRefreshToken(refreshToken, token);
+
+        if (user != null && _tokenRepository.IsRefreshTokenActivated())
+        {
+            
+            _tokenRepository.ActivateToken(refreshToken, token);
+            return await GetNewTokens(user, token);
+        }
+
+        return null;
+    }
+
+    private async Task<GetNewTokensResponse> GetNewTokens(User user, CancellationToken token)
+    {
+        var refreshToken = new JwtRefreshToken()
+        {
+            Token = GenerateToken(user,
+                TokenType.Refresh),
+            UserId = user.Id
+        };
+        await _tokenRepository.CreateRefreshToken(refreshToken, token);
         
-        if (VerifyRefreshToken(refreshToken))
-            Console.WriteLine("1234");
-        
-        return new GetNewTokensResponse();
+        return new GetNewTokensResponse()
+        {
+            AccessToken = GenerateToken(user, TokenType.Access),
+            RefreshToken = refreshToken.Token
+        };
     }
     
-    
-    
-    private string GenerateToken(User user, long tokenLifeTimeInSeconds, TokenType type)
+    private string GenerateToken(User user, TokenType type)
     {
         var credentials = new SigningCredentials(_jwtSettings.GetSymmetricSecurityKey(),
             SecurityAlgorithms.HmacSha256);
         
         var claims = new List<Claim>()
         {
-            new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString()),
-            new Claim("type", type.ToString().ToLower()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim("type", type.ToString()),
             //new Claim("Username", user.Username),
             new Claim(JwtRegisteredClaimNames.Email, user.Email)
         };
@@ -116,34 +126,50 @@ internal class AuthService : IAuthService
             _jwtSettings.Issuer,
             _jwtSettings.Audience,
             claims,
-            expires:new DateTime().AddSeconds(tokenLifeTimeInSeconds),
+            expires:new DateTime().AddSeconds(_jwtSettings.TokenLifeTimeInSeconds),
             signingCredentials:credentials);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
-    private bool VerifyRefreshToken(string refreshToken)
+    private async Task<User> VerifyRefreshToken(string refreshToken, CancellationToken token)
     {
-        //var payload = JwtPayload.Base64UrlDeserialize(refreshToken);
-        //payload.
         var handler = new JwtSecurityTokenHandler();
-
-        handler.ValidateToken(refreshToken,
-            new TokenValidationParameters()
-            {
-                ValidateIssuer = true,
-                ValidIssuer = _jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = _jwtSettings.Audience,
-                IssuerSigningKey = _jwtSettings.GetSymmetricSecurityKey(),
-                ValidateIssuerSigningKey = true,
-                RequireExpirationTime = true,
-            },
-            out SecurityToken validatedToken);
-
-        //handler.r()
         
-        
+        try
+        {
+            handler.ValidateToken(refreshToken,
+                new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = _jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = _jwtSettings.Audience,
+                    IssuerSigningKey = _jwtSettings.GetSymmetricSecurityKey(),
+                    ValidateIssuerSigningKey = true,
+                    RequireExpirationTime = true,
+                },
+                out var validatedToken);
             
-        return true;
+            var jwtValidatedToken = validatedToken as JwtSecurityToken;
+
+            var claim = jwtValidatedToken.Claims.FirstOrDefault(claim => claim.Type == "type");
+            if (claim == null || claim.Value != TokenType.Refresh.ToString())
+                return null;
+            
+            claim = jwtValidatedToken.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub);
+            if (claim == null)
+                return null;
+
+            var userId = long.Parse(claim.Value);
+            var user = await _userService.GetById(userId, token);
+            if (user == null)
+                return null;
+            
+            return user;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

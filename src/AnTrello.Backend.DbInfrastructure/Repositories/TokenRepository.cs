@@ -75,4 +75,27 @@ public class TokenRepository(IOptions<DbSettings> settings)
                 cancellationToken: token
             ))).FirstOrDefault();
     }
+
+    public async Task ActivateToken(string refreshToken, CancellationToken token)
+    {
+        string sql =
+            """
+            UPDATE jwt_refresh_tokens
+                SET is_activated=true
+                WHERE token = @RefreshToken
+            """;
+        
+        await using var connection = await GetConnection();
+        
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    RefreshToken = refreshToken
+                },
+                cancellationToken: token
+            ));
+        
+    }
 }

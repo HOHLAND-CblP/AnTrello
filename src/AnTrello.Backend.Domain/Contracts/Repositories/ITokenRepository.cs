@@ -9,5 +9,7 @@ public interface ITokenRepository
     Task<bool?> IsRefreshTokenActivated(string refreshToken, CancellationToken token);
 
     Task<JwtRefreshToken> GetRefreshToken(string refreshToken, CancellationToken token);
+
+    Task ActivateToken(string refreshToken, CancellationToken token);
     //System.Threading.Tasks.Task DeleteToken(long id, CancellationToken token);
 }
