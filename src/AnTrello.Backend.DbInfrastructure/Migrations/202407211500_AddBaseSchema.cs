@@ -1,4 +1,5 @@
 using FluentMigrator;
+using FluentMigrator.Expressions;
 
 namespace AnTrello.Backend.DbInfrastructure.Migrations;
 
@@ -21,11 +22,17 @@ public class AddBaseSchema : Migration
                 updated_at      timestamp with time zone
             );
 
+            CREATE TABLE IF NOT EXISTS jwt_refresh_tokens (
+                token           varchar PRIMARY KEY,
+                user_id         bigint NOT NULL references users(id) ON DELETE CASCADE,
+                is_activated    boolean NOT NUll DEFAULT(false)
+            );
+
             CREATE TABLE IF NOT EXISTS tasks (
                 id              bigserial PRIMARY KEY,
                 name            varchar NOT NULL,
                 is_completed    boolean NOT NUll default(false),
-                user_id         bigint NOT NULL references users(id),
+                user_id         bigint NOT NULL references users(id) ON DELETE CASCADE,
                 priority        varchar NOT NULL,
                 created_at      timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at      timestamp with time zone 
@@ -37,7 +44,7 @@ public class AddBaseSchema : Migration
                 color       varchar,
                 duration    int NOT NULL,
                 "order"     int NOT NULL default(1),
-                user_id     bigint NOT NULL references users(id),
+                user_id     bigint NOT NULL references users(id) ON DELETE CASCADE,
                 created_at  timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at  timestamp with time zone 
             );
@@ -46,7 +53,7 @@ public class AddBaseSchema : Migration
                 id              bigserial PRIMARY KEY,
                 total_seconds   bigint NOT NULL,
                 is_completed    boolean NOT NUll default(false),
-                user_id         bigint NOT NULL references users(id),
+                user_id         bigint NOT NULL references users(id) ON DELETE CASCADE,
                 created_at      timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at      timestamp with time zone 
             );
@@ -55,7 +62,7 @@ public class AddBaseSchema : Migration
                 id                  bigserial PRIMARY KEY,
                 tital_seconds       bigint NOT NULL,
                 is_completed        boolean NOT NUll default(false),
-                pomodoro_session_id bigint NOT NULL references pomodoro_sessinos(id) ON DELETE CASCADE,
+                pomodoro_session_id bigint NOT NULL references pomodoro_sessions(id) ON DELETE CASCADE,
                 created_at          timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at          timestamp with time zone 
             );

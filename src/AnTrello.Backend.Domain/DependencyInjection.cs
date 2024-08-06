@@ -14,6 +14,9 @@ public static class DependencyInjection
         services.Configure<HashSettings>(config.GetSection("HashSettings"));
         
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
+        
         return services;
     }
+    
 }

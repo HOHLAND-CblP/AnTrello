@@ -8,10 +8,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Dapper" Version="2.1.35" />
       <PackageReference Include="FluentMigrator" Version="5.2.0" />
       <PackageReference Include="FluentMigrator.Extensions.Postgres" Version="5.2.0" />
       <PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
       <PackageReference Include="Npgsql" Version="8.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AnTrello.Backend.Domain\AnTrello.Backend.Domain.csproj" />
     </ItemGroup>
 
 </Project>
