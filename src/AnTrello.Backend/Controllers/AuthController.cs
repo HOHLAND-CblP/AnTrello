@@ -5,9 +5,7 @@ using AnTrello.Backend.Domain.Contracts.Dtos.AuthService.Login;
 using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Create;
 using AnTrello.Backend.Domain.Contracts.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using MoinBackend.Controllers;
 
 namespace AnTrello.Backend.Controllers;
 
@@ -69,9 +67,14 @@ public class AuthController : BaseController
             return StatusCode(StatusCodes.Status401Unauthorized, "Refresh token not passed");
         }
 
-        await _service.GetNewTokens(refreshToken, token);
+        var tokens = await _service.GetNewTokens(refreshToken, token);
         
-        return Ok();
+        if (tokens == null)
+            return StatusCode(StatusCodes.Status401Unauthorized, new {Error = "No such user or not valid refresh token"});
+        
+        AddRefreshTokenToResponse(Response, tokens.RefreshToken);
+        
+        return Ok(tokens);
     }
     
     [Authorize]

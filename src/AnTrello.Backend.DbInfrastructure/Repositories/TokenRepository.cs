@@ -32,7 +32,7 @@ public class TokenRepository(IOptions<DbSettings> settings)
             ));
     }
 
-    public async Task<bool?> IsRefreshTokenActivated(string refreshToken, CancellationToken token)
+    public async Task<bool> IsRefreshTokenActivated(string refreshToken, CancellationToken token)
     {
         string sql =
             """
@@ -43,7 +43,7 @@ public class TokenRepository(IOptions<DbSettings> settings)
         
         await using var connection = await GetConnection();
         
-        return (await connection.QueryAsync<bool?>(
+        return (await connection.QueryAsync<bool>(
             new CommandDefinition(
                 sql,
                 new
@@ -51,7 +51,7 @@ public class TokenRepository(IOptions<DbSettings> settings)
                     Token = refreshToken
                 },
                 cancellationToken: token
-            ))).FirstOrDefault();
+            ))).FirstOrDefault(true);
     }
 
     public async Task<JwtRefreshToken> GetRefreshToken(string refreshToken, CancellationToken token)
@@ -96,6 +96,27 @@ public class TokenRepository(IOptions<DbSettings> settings)
                 },
                 cancellationToken: token
             ));
+    }
+
+    public async Task ActivateAllTokens(long userId, CancellationToken token)
+    {
+        string sql =
+            """
+            UPDATE jwt_refresh_tokens
+                SET is_activated=true
+                WHERE user_id = @UserId
+            """;
         
+        await using var connection = await GetConnection();
+        
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    UserId = userId
+                },
+                cancellationToken: token
+            ));
     }
 }

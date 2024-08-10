@@ -40,23 +40,15 @@ internal class AuthService : IAuthService
         var user = await _userService.GetByEmail(request.Email, token);
         if (!await _userService.VerifyUser(request.Email, request.Password, token))
             throw new AuthenticationException("Wrong login or password");
-        
-        var accessToken = GenerateToken(user,
-            TokenType.Access);
-        var refreshToken = new JwtRefreshToken()
-        {
-            Token = GenerateToken(user,
-                TokenType.Refresh),
-            UserId = user.Id
-        };
-        
-        await _tokenRepository.CreateRefreshToken(refreshToken, token);
+
+
+        var tokens = await GetNewTokens(user, token);
         
         return new LoginResponse
         {
             User = user,
-            Token = GenerateToken(user, TokenType.Access),
-            RefreshToken = GenerateToken(user, TokenType.Refresh)
+            AccessToken = tokens.AccessToken,
+            RefreshToken = tokens.RefreshToken
         };
     }
 
@@ -66,13 +58,13 @@ internal class AuthService : IAuthService
         if (oldUser != null)
             throw new ArgumentException("User already exist");
 
-        var createResponse = await _userService.Create(request, token);
+        var createUserResponse = await _userService.Create(request, token);
 
-        var tokens = await GetNewTokens(createResponse.User, token);
+        var tokens = await GetNewTokens(createUserResponse.User, token);
         
         return new RegisterResponse
         {
-            User = createResponse.User,
+            User = createUserResponse.User,
             AccessToken = tokens.AccessToken,
             RefreshToken = tokens.RefreshToken
         };
@@ -82,11 +74,17 @@ internal class AuthService : IAuthService
     {
         var user = await VerifyRefreshToken(refreshToken, token);
 
-        if (user != null && _tokenRepository.IsRefreshTokenActivated())
+        if (user != null)
         {
-            
-            _tokenRepository.ActivateToken(refreshToken, token);
-            return await GetNewTokens(user, token);
+            if (await _tokenRepository.IsRefreshTokenActivated(refreshToken, token))
+            {
+                await _tokenRepository.ActivateAllTokens(user.Id, token);
+            }
+            else
+            {
+                await _tokenRepository.ActivateToken(refreshToken, token);
+                return await GetNewTokens(user, token);
+            }
         }
 
         return null;
@@ -121,12 +119,16 @@ internal class AuthService : IAuthService
             //new Claim("Username", user.Username),
             new Claim(JwtRegisteredClaimNames.Email, user.Email)
         };
+
+        var lifeTimeInSeconds = type == TokenType.Access
+            ? _jwtSettings.TokenLifeTimeInSeconds
+            : _jwtSettings.RefreshTokenLifeTimeInSeconds;
         
         var token = new JwtSecurityToken(
             _jwtSettings.Issuer,
             _jwtSettings.Audience,
             claims,
-            expires:new DateTime().AddSeconds(_jwtSettings.TokenLifeTimeInSeconds),
+            expires: DateTime.UtcNow.AddSeconds(lifeTimeInSeconds),
             signingCredentials:credentials);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

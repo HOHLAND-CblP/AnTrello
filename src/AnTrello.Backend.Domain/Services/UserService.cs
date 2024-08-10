@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Create;
+using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Update;
 using AnTrello.Backend.Domain.Contracts.Repositories;
 using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities;
@@ -61,6 +62,19 @@ internal class UserService : IUserService
         var user = await _repository.GetByEmail(email, token);
         return user != null && CheckPassword(password, user.Password);
     }
+
+    public async Task<User> Update(UpdateUserRequest request, CancellationToken token)
+    {
+        var user = await _repository.GetById(request.User.Id, token);
+        if (user == null)
+            throw new KeyNotFoundException("User not found");
+
+        user = await _repository.UpdateUser(request.User, token);
+
+        return user;
+    }
+
+    
     
 
     private string CreatePbkdf2Hash(string password)

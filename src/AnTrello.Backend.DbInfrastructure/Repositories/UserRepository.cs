@@ -84,5 +84,36 @@ public class UserRepository: MainRepository,  IUserRepository
             ))).FirstOrDefault();
     }
 
-    
+    public async Task<User> UpdateUser(User user, CancellationToken token)
+    {
+        string sql =
+            """
+            UPDATE users
+                SET email = @Email,
+                    name = @Name,
+                    break_interval = @BreakInterval,
+                    intervals_count = @IntervalsCount,
+                    work_interval = @WorkInterval,
+                    updated_at = @UpdatedAt
+                WHERE id = @Id
+            returning *;
+            """;
+        
+        await using var connection = await GetConnection();
+        
+        return (await connection.QueryAsync<User>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Name = user.Name,
+                    BreakInterval = user.BreakInterval,
+                    IntervalsCount = user.IntervalsCount,
+                    UpdatedAt = user.UpdatedAt,
+                },
+                cancellationToken: token
+            ))).FirstOrDefault();
+    }
 }

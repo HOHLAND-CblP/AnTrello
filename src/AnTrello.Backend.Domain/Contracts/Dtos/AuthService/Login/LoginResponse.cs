@@ -7,6 +7,6 @@ namespace AnTrello.Backend.Domain.Contracts.Dtos.AuthService.Login;
 public class LoginResponse
 {
     public User User { get; init; }
-    public string Token { get; init; }
+    public string AccessToken { get; init; }
     public string RefreshToken { get; set; }
 }

@@ -5,6 +5,7 @@ using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities.Jwt;
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -50,14 +51,14 @@ class Program
                 {
                     OnTokenValidated = async context => 
                     {
-                        if (context.Principal.Claims.First(claim => claim.Type == "sid") == null)
+                        if (context.Principal.Claims.FirstOrDefault(claim => claim.Type == "type") == null)
                             context.Fail("Not valid token");
 
                         var tokenType = context.Principal.Claims.First(claim => claim.Type == "type").Value;
                         if (tokenType != TokenType.Access.ToString())
                             context.Fail("Not access token");
 
-                        var userId = long.Parse(context.Principal.Claims.First(claim => claim.Type == "sid").Value);
+                        var userId = long.Parse(context.Principal.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value);
                         var userService = services.BuildServiceProvider().GetService<IUserService>();
                         
                         var user = await userService!.GetById(userId, CancellationToken.None);
