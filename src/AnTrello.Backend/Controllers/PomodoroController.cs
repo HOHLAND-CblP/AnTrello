@@ -1,4 +1,5 @@
-﻿using AnTrello.Backend.Domain.Contracts.Dtos.PomodoroService.UpdateRound;
+﻿using AnTrello.Backend.Domain.Contracts.Dtos.PomodoroService.DeleteSession;
+using AnTrello.Backend.Domain.Contracts.Dtos.PomodoroService.UpdateRound;
 using AnTrello.Backend.Domain.Contracts.Dtos.PomodoroService.UpdateSession;
 using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities;
@@ -59,6 +60,22 @@ public class PomodoroController : BaseController
         request.UserId = UserId;
         
         await _service.UpdateSession(request, token);
+
+        return Ok();
+    }
+    
+    [Authorize]
+    [HttpDelete]
+    [Route("{id}")]
+    public async Task<ActionResult> Delete(long id, CancellationToken token)
+    {
+        var request = new DeleteSessionRequest
+        {
+            Id = id,
+            UserId = UserId
+        };
+        
+        await _service.DeleteSession(request, token);
 
         return Ok();
     }
