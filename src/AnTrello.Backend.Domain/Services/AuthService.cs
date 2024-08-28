@@ -17,7 +17,6 @@ using AnTrello.Backend.Domain.Entities;
 using AnTrello.Backend.Domain.Entities.Jwt;
 using AnTrello.Backend.Domain.Settings;
 using JwtConstants = System.IdentityModel.Tokens.Jwt.JwtConstants;
-using Task = AnTrello.Backend.Domain.Entities.Task;
 
 namespace AnTrello.Backend.Domain.Services;
 
@@ -37,11 +36,10 @@ internal class AuthService : IAuthService
     
     public async Task<LoginResponse> Login(LoginRequest request, CancellationToken token)
     {
-        var user = await _userService.GetByEmail(request.Email, token);
         if (!await _userService.VerifyUser(request.Email, request.Password, token))
             throw new AuthenticationException("Wrong login or password");
 
-
+        var user = await _userService.GetByEmail(request.Email, token);
         var tokens = await GetNewTokens(user, token);
         
         return new LoginResponse

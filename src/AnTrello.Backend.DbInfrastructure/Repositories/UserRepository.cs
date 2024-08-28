@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace AnTrello.Backend.DbInfrastructure.Repositories;
 
-public class UserRepository: MainRepository,  IUserRepository
+public class UserRepository: BasePgRepository,  IUserRepository
 {
     public UserRepository(IOptions<DbSettings> settings) : base(settings.Value.PostgresConnectionString){}
 

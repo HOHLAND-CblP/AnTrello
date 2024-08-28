@@ -2,7 +2,7 @@ using AnTrello.Backend.Domain.Entities.Jwt;
 
 namespace AnTrello.Backend.Domain.Contracts.Repositories;
 
-public interface ITokenRepository
+public interface ITokenRepository 
 {
     Task CreateRefreshToken(JwtRefreshToken refreshToken, CancellationToken token);
     //Task<JwtRefreshToken> GetToken(long id, CancellationToken token);

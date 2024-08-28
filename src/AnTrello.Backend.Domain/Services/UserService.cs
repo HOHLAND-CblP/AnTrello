@@ -1,23 +1,27 @@
 using System.Security.Cryptography;
 using System.Text;
 using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Create;
+using AnTrello.Backend.Domain.Contracts.Dtos.UserService.GetProfile;
 using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Update;
 using AnTrello.Backend.Domain.Contracts.Repositories;
 using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities;
 using AnTrello.Backend.Domain.Settings;
 using Microsoft.Extensions.Options;
+using Task = System.Threading.Tasks.Task;
 
 namespace AnTrello.Backend.Domain.Services;
 
 internal class UserService : IUserService
 {
     private readonly IUserRepository _repository;
+    private readonly ITaskRepository _taskRepository;
     private readonly HashSettings _hashSettings;
 
-    public UserService(IUserRepository repository, IOptions<HashSettings> hashSettings)
+    public UserService(IUserRepository repository, ITaskRepository taskRepository, IOptions<HashSettings> hashSettings)
     {
         _repository = repository;
+        _taskRepository = taskRepository;
         _hashSettings = hashSettings.Value;
     }
 
@@ -72,6 +76,28 @@ internal class UserService : IUserService
         user = await _repository.UpdateUser(request.User, token);
 
         return user;
+    }
+
+    public async Task<GetProfileResponse> GetProfile(long id, CancellationToken token)
+    {
+        var user = await GetById(id, token);
+
+        if (user != null)
+        {
+            return new GetProfileResponse
+            {
+                User = user,
+                Statistics = new Dictionary<string, int>()
+                {
+                    { "Total", (await _taskRepository.GetAllUsersTasks(id, token)).Count },
+                    { "Completed tasks", (await _taskRepository.GetAllCompletedTasks(id, token)).Count },
+                    { "Today tasks", (await _taskRepository.GetTasksBeforeDate(id, DateOnly.FromDateTime(DateTime.Now), token)).Count },
+                    { "Week tasks", (await _taskRepository.GetTasksBeforeDate(id, DateOnly.FromDateTime(DateTime.Now.AddDays(7)), token)).Count }
+                }
+            };
+        }
+
+        return null;
     }
 
     

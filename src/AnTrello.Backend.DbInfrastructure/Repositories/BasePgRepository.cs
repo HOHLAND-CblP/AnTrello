@@ -3,11 +3,11 @@ using Npgsql;
 
 namespace AnTrello.Backend.DbInfrastructure.Repositories;
 
-public class MainRepository
+public abstract class BasePgRepository 
 {
     private readonly string _connectionString;
     
-    public MainRepository(string connectionString)
+    public BasePgRepository(string connectionString)
     {
         _connectionString = connectionString;
     }

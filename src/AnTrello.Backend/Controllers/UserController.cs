@@ -1,3 +1,4 @@
+using AnTrello.Backend.Domain.Contracts.Dtos.UserService.GetProfile;
 using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Update;
 using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities;
@@ -7,27 +8,27 @@ using Microsoft.AspNetCore.Mvc;
 namespace AnTrello.Backend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/user/profile")]
 public class UserController(IUserService service) : BaseController
 {
     private readonly IUserService _service = service;
 
     [Authorize]
-    [HttpGet("")]
-    public async Task<ActionResult> GetUser(CancellationToken token)
+    [HttpGet]
+    public async Task<ActionResult<GetProfileResponse>> Get(CancellationToken token)
     {
-        var user = await _service.GetById(UserId, token);
+        var user = await _service.GetProfile(UserId, token);
         
         return Ok(user);
     }
 
     [Authorize]
-    [HttpPost]
-    public async Task<ActionResult> Update(UpdateUserRequest request, CancellationToken token)
+    [HttpPut]
+    public async Task<ActionResult<User>> Update(UpdateUserRequest request, CancellationToken token)
     {
         if (request.User.Id != UserId)
             return StatusCode(StatusCodes.Status403Forbidden, "You can`t get info about another user");
-
+        
         try
         {
             var user = _service.Update(request, token);

@@ -64,7 +64,7 @@ public class AddBaseSchema : Migration
                 is_completed        boolean NOT NUll default(false),
                 pomodoro_session_id bigint NOT NULL references pomodoro_sessions(id) ON DELETE CASCADE,
                 created_at          timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
-                updated_at          timestamp with time zone 
+                updated_at          timestamp with time zone
             );
             """;
         

@@ -15,8 +15,10 @@ public static class DependencyInjection
         
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITaskService, TaskService>();
+        services.AddScoped<ITimeBlockService, TimeBlockService>();
+        services.AddScoped<IPomodoroService, PomodoroService>();
         
         return services;
     }
-    
 }

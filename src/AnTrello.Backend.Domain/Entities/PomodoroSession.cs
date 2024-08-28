@@ -3,9 +3,10 @@
 public class PomodoroSession
 {
     public long Id { get; set; }           
-    public long TotalSeconds { get; set; }
-    public bool IsCompleted { get; set; } 
-    public long UserId { get; set; }       
-    public DateTime CreatedAt { get; set; }     
-    public DateTime? UpdatedAt { get; set; }
+    public long TotalSeconds { get; init; }
+    public bool IsCompleted { get; set; }
+    public List<PomodoroRound> Rounds { get; set; }
+    public long UserId { get; init; }       
+    public DateTime CreatedAt { get; init; }     
+    public DateTime? UpdatedAt { get; init; }
 }

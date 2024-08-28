@@ -26,6 +26,10 @@ public static class DependencyInjection
     {
         services.AddScoped<ITokenRepository, TokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<ITimeBlockRepository, TimeBlockRepository>();
+        services.AddScoped<IPomodoroSessionRepository, PomodoroSessionRepository>();
+        services.AddScoped<IPomodoroRoundRepository, PomodoroRoundRepository>();
         
         return services;
     }

@@ -8,7 +8,7 @@ using Task = System.Threading.Tasks.Task;
 namespace AnTrello.Backend.DbInfrastructure.Repositories;
 
 public class TokenRepository(IOptions<DbSettings> settings)
-    : MainRepository(settings.Value.PostgresConnectionString), ITokenRepository
+    : BasePgRepository(settings.Value.PostgresConnectionString), ITokenRepository
 {
     public async Task CreateRefreshToken(JwtRefreshToken refreshToken, CancellationToken token)
     {
