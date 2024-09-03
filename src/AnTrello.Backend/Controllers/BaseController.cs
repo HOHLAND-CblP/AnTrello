@@ -5,6 +5,6 @@ namespace AnTrello.Backend.Controllers;
 
 public class BaseController : ControllerBase
 {
-    internal long UserId => long.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub).Value);
-    internal string UserEmail => User.FindFirst(JwtRegisteredClaimNames.Email).Value;
+    internal long UserId => long.Parse(User?.FindFirst("sub").Value);
+    internal string UserEmail => User?.FindFirst(JwtRegisteredClaimNames.Email).Value;
 }

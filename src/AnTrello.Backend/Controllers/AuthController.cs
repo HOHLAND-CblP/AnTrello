@@ -26,6 +26,7 @@ public class AuthController : BaseController
     [Route("[action]")]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request, CancellationToken token)
     {
+        Console.WriteLine("Login");
         try
         {
             var response = await _service.Login(request, token);
@@ -49,6 +50,7 @@ public class AuthController : BaseController
     [Route("[action]")]
     public async Task<ActionResult<RegisterResponse>> Register(CreateUserRequest request, CancellationToken token)
     {
+        Console.WriteLine("Register");
         var response = await _service.Register(request, token);
         AddRefreshTokenToResponse(Response, response.RefreshToken);
         //response.RefreshToken = null;

@@ -21,6 +21,21 @@ class Program
         services.AddDbInfrastructure(config);
         services.AddControllers();
 
+// CORS =========================================================================        
+
+        var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+        
+        services.AddCors(options =>
+        {
+            options.AddPolicy(name: MyAllowSpecificOrigins,
+                policy  =>
+                {
+                    policy.WithOrigins("http://localhost:3000");
+                    policy.AllowCredentials();
+                    policy.AllowAnyMethod();
+                    policy.AllowAnyHeader();
+                });
+        });
         
 // Auth =========================================================================
 
@@ -36,6 +51,7 @@ class Program
             })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
+                options.IncludeErrorDetails = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -45,7 +61,6 @@ class Program
                     IssuerSigningKey = key,
                     ValidateIssuerSigningKey = true,
                     RequireExpirationTime = true,
-
                 };
                 options.Events = new JwtBearerEvents
                 {
@@ -58,7 +73,7 @@ class Program
                         if (tokenType != TokenType.Access.ToString())
                             context.Fail("Not access token");
 
-                        var userId = long.Parse(context.Principal.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value);
+                        var userId = long.Parse(context.Principal.Claims.First(claim => claim.Type == "sub").Value);
                         var userService = services.BuildServiceProvider().GetService<IUserService>();
                         
                         var user = await userService!.GetById(userId, CancellationToken.None);
@@ -68,6 +83,8 @@ class Program
                             context.Fail("No such user");
                     } };
             });
+            Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         
 // Swagger =================================================
         services.AddEndpointsApiExplorer();
@@ -104,12 +121,11 @@ class Program
         if (Migrate(args, app))
             return;
 
-
+        app.UseCors(MyAllowSpecificOrigins);
 
         app.UseAuthentication();
         app.UseAuthorization();
         
-        app.UseCors();
         
         if (app.Environment.IsDevelopment())
         {

@@ -9,14 +9,20 @@ namespace AnTrello.Backend.Controllers;
 
 [ApiController]
 [Route("api/user/profile")]
-public class UserController(IUserService service) : BaseController
+public class UserController: BaseController
 {
-    private readonly IUserService _service = service;
+    private readonly IUserService _service;
+
+    public UserController(IUserService service)
+    {
+        _service = service;
+    }
 
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<GetProfileResponse>> Get(CancellationToken token)
     {
+        Console.WriteLine(UserId);
         var user = await _service.GetProfile(UserId, token);
         
         return Ok(user);
@@ -31,7 +37,7 @@ public class UserController(IUserService service) : BaseController
         
         try
         {
-            var user = _service.Update(request, token);
+            var user = await _service.Update(request, token);
             
             return Ok(user);
         }
