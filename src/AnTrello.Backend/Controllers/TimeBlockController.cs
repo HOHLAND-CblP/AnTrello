@@ -25,9 +25,9 @@ public class TimeBlockController : BaseController
     [HttpGet]
     public async Task<ActionResult<List<TimeBlock>>> GetAll(CancellationToken token)
     {
-        var users = await _service.GetAll(UserId, token);
+        var timeBlocks = await _service.GetAll(UserId, token);
 
-        return Ok(users);
+        return Ok(timeBlocks);
     }
         
     /*[Authorize]
@@ -44,9 +44,9 @@ public class TimeBlockController : BaseController
     public async Task<ActionResult<TimeBlock>> Create(CreateTimeBlockRequest request, CancellationToken token)
     {
         request.UserId = UserId;
-        var task = await _service.Create(request, token);
+        var timeBlock = await _service.Create(request, token);
         
-        return task;
+        return timeBlock;
     }
 
     [Authorize]
@@ -70,12 +70,12 @@ public class TimeBlockController : BaseController
         request.Id = id;
         request.UserId = UserId;
         
-        var task = await _service.Update(request, token);
+        var timeBlock = await _service.Update(request, token);
 
-        if (task == null)
-            return StatusCode(StatusCodes.Status404NotFound, "Task not found");
+        if (timeBlock == null)
+            return StatusCode(StatusCodes.Status404NotFound, "Time block not found");
             
-        return task;
+        return timeBlock;
     }
     
     [Authorize]

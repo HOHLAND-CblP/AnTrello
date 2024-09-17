@@ -5,5 +5,5 @@ public class UpdateRoundRequest
     public long Id { get; set; }
     public long UserId { get; set; }
     public int TotalSeconds { get; init; }
-    public bool IsCompeted { get; init; }
+    public bool IsCompleted { get; init; }
 }

@@ -19,8 +19,9 @@ public class TimeBlockRepository : BasePgRepository, ITimeBlockRepository
         string sql =
             """
             SELECT *
-            FROM tasks
-            WHERE userId = @UserId;
+            FROM time_blocks
+            WHERE user_Id = @UserId
+            ORDER BY "order" ASC;
             """;
         
         await using var connection = await GetConnection();
@@ -126,9 +127,9 @@ public class TimeBlockRepository : BasePgRepository, ITimeBlockRepository
         string sql =
             """
             UPDATE time_blocks
-            SET "order" = @Order
+            SET "order" = @Order,
                 updated_at = @UpdatedAt
-            WHERE id = @Id
+            WHERE id = @Id;
             """;
 
         await using var connection = await GetConnection();

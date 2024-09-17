@@ -33,9 +33,9 @@ internal class UserService : IUserService
             Email = request.Email,
             Name = request.Name,
             Password = CreatePbkdf2Hash(request.Password),
-            BreakInterval = 50,
+            BreakInterval = 7,
             IntervalsCount = 10,
-            WorkInterval = 7,
+            WorkInterval = 50,
             CreatedAt = DateTime.UtcNow
         };
         
@@ -69,11 +69,14 @@ internal class UserService : IUserService
 
     public async Task<User> Update(UpdateUserRequest request, CancellationToken token)
     {
-        var user = await _repository.GetById(request.User.Id, token);
+        var user = await _repository.GetById(request.Id, token);
         if (user == null)
             throw new KeyNotFoundException("User not found");
 
-        user = await _repository.UpdateUser(request.User, token);
+        if (request.Password != null)
+            request.Password = CreatePbkdf2Hash(request.Password);
+        
+        user = await _repository.UpdateUser(request, token);
 
         return user;
     }
@@ -87,12 +90,12 @@ internal class UserService : IUserService
             return new GetProfileResponse
             {
                 User = user,
-                Statistics = new Dictionary<string, int>()
+                Statistics = new List<StatisticBody>()
                 {
-                    { "Total", (await _taskRepository.GetAllUsersTasks(id, token)).Count },
-                    { "Completed tasks", (await _taskRepository.GetAllCompletedTasks(id, token)).Count },
-                    { "Today tasks", (await _taskRepository.GetTasksBeforeDate(id, DateOnly.FromDateTime(DateTime.Now), token)).Count },
-                    { "Week tasks", (await _taskRepository.GetTasksBeforeDate(id, DateOnly.FromDateTime(DateTime.Now.AddDays(7)), token)).Count }
+                   new StatisticBody{ Label = "Total", Value = (await _taskRepository.GetAllUsersTasks(id, token)).Count },
+                   new StatisticBody{ Label = "Completed tasks", Value = (await _taskRepository.GetAllCompletedTasks(id, token)).Count },
+                   new StatisticBody{ Label = "Today tasks", Value = (await _taskRepository.GetTasksBeforeDate(id, DateTime.Today, token)).Count },
+                   new StatisticBody{ Label = "Week tasks", Value = (await _taskRepository.GetTasksBeforeDate(id, DateTime.Today.AddDays(7), token)).Count }
                 }
             };
         }

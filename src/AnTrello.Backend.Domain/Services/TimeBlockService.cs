@@ -74,7 +74,7 @@ public class TimeBlockService : ITimeBlockService
     {
         var timeBlock = await _repository.Get(request.Id, token);
 
-        if (timeBlock != null && timeBlock.UserId != request.UserId)
+        if (timeBlock != null && timeBlock.UserId == request.UserId)
         {
             await _repository.Delete(request.Id, token);
         }

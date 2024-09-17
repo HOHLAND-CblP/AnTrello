@@ -78,13 +78,11 @@ public class AuthController : BaseController
         
         return Ok(tokens);
     }
-    
-    [Authorize]
+
     [HttpPost]
     [Route("[action]")]
     public async Task<ActionResult> Logout(CancellationToken token)
     {
-        Console.WriteLine(UserId);
         RemoveRefreshTokenFromResponse(Response);
         return Ok();
     }

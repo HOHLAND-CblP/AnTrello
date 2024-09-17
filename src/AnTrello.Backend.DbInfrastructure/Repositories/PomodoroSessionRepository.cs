@@ -51,18 +51,19 @@ public class PomodoroSessionRepository: BasePgRepository, IPomodoroSessionReposi
             """
             SELECT *
             FROM pomodoro_sessions
-            WHERE user_id = @UserId AND created_at => @Today
+            WHERE user_id = @UserId AND created_at >= @Today
             LIMIT 1;
 
-            SELECT *
+            SELECT pr.*
             FROM pomodoro_rounds pr, 
                 (  
                     SELECT *
                     FROM pomodoro_sessions
-                    WHERE user_id = @UserId AND created_at => @Today
-                    LIMIT 1;
+                    WHERE user_id = @UserId AND created_at >= @Today
+                    LIMIT 1
                 ) as ps              
-            WHERE pr.pomodoro_session_id = ps.id;
+            WHERE pr.pomodoro_session_id = ps.id
+            ORDER BY pr.id;
             """;
         
         await using var connection = await GetConnection();

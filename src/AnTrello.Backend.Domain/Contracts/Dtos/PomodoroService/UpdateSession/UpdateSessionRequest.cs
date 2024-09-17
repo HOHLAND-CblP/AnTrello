@@ -4,5 +4,5 @@ public class UpdateSessionRequest
 { 
     public long Id { get; set; }
     public long UserId { get; set; }
-    public bool IsComplete { get; init; }
+    public bool IsCompleted { get; init; }
 }

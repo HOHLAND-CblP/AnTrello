@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AnTrello.Backend.Controllers;
 
 [ApiController]
-[Route("user/timer")]
+[Route("api/user/timer")]
 public class PomodoroController : BaseController
 {
     private readonly IPomodoroService _service;
@@ -58,7 +58,7 @@ public class PomodoroController : BaseController
     {
         request.Id = id;
         request.UserId = UserId;
-        
+        Console.WriteLine(request.IsCompleted);
         await _service.UpdateSession(request, token);
 
         return Ok();

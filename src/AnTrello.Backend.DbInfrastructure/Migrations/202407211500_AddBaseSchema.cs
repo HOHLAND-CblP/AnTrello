@@ -15,9 +15,9 @@ public class AddBaseSchema : Migration
                 email           varchar unique NOT NULL,
                 name            varchar,
                 password        varchar NOT NULL,
-                break_interval  int default(50),
+                break_interval  int default(7),
                 intervals_count int default(10),
-                work_interval   int default(7),
+                work_interval   int default(50),
                 created_at      timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at      timestamp with time zone
             );
@@ -60,12 +60,28 @@ public class AddBaseSchema : Migration
 
             CREATE TABLE IF NOT EXISTS pomodoro_rounds  (
                 id                  bigserial PRIMARY KEY,
-                tital_seconds       bigint NOT NULL,
+                total_seconds       bigint NOT NULL,
                 is_completed        boolean NOT NUll default(false),
                 pomodoro_session_id bigint NOT NULL references pomodoro_sessions(id) ON DELETE CASCADE,
                 created_at          timestamp with time zone NOT NULL default (now() at time zone 'utc' ),
                 updated_at          timestamp with time zone
-            );
+            );  
+
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pomodoro_round_v1') THEN
+                    CREATE TYPE pomodoro_round_v1 as
+                    (
+                        id                  bigint,
+                        total_seconds       bigint,
+                        is_completed        boolean,
+                        pomodoro_session_id bigint,
+                        created_at          timestamp with time zone,
+                        updated_at          timestamp with time zone
+                    );
+                END IF;
+            END
+            $$;
             """;
         
         Execute.Sql(sql);
@@ -75,10 +91,17 @@ public class AddBaseSchema : Migration
     {
         string sql =
             """
+            DO $$
+                BEGIN
+                    DROP TYPE IF EXISTS pomodoro_round_v1;
+                END
+            $$;
+            
             DROP TABLE pomodoro_rounds;
-            DROP TABLE pomodoro_sessinos;
+            DROP TABLE pomodoro_sessions;
             DROP TABLE time_blocks;
             DROP TABLE tasks;
+            DROP TABLE jwt_refresh_tokens;
             DROP TABLE users;
             """;
         

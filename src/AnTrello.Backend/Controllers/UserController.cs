@@ -22,7 +22,6 @@ public class UserController: BaseController
     [HttpGet]
     public async Task<ActionResult<GetProfileResponse>> Get(CancellationToken token)
     {
-        Console.WriteLine(UserId);
         var user = await _service.GetProfile(UserId, token);
         
         return Ok(user);
@@ -32,8 +31,7 @@ public class UserController: BaseController
     [HttpPut]
     public async Task<ActionResult<User>> Update(UpdateUserRequest request, CancellationToken token)
     {
-        if (request.User.Id != UserId)
-            return StatusCode(StatusCodes.Status403Forbidden, "You can`t get info about another user");
+        request.Id = UserId;
         
         try
         {

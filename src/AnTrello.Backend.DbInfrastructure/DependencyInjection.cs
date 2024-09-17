@@ -5,6 +5,7 @@ using AnTrello.Backend.Domain.Contracts.Repositories;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 
 namespace AnTrello.Backend.DbInfrastructure;
@@ -43,7 +44,7 @@ public static class DependencyInjection
 
         return services;
     }
-    
+
     private static void MapCompositeTypes()
     {
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;

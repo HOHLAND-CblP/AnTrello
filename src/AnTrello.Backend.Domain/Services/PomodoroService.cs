@@ -27,7 +27,7 @@ public class PomodoroService : IPomodoroService
     
     public async Task<PomodoroSession> GetTodaySession(long userId, CancellationToken token)
     {
-        var today = DateTime.Today;
+        var today = DateTime.Today < DateTime.UtcNow ? DateTime.Today : DateTime.Today.AddDays(-1);
         
         return await _sessionRepository.GetTodaySession(today, userId, token);
     }
@@ -48,7 +48,7 @@ public class PomodoroService : IPomodoroService
             TotalSeconds = 0,
             IsCompleted = false,
             UserId = userId,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow
         };
         
         session.Id = await _sessionRepository.Create(session, token);
@@ -62,7 +62,7 @@ public class PomodoroService : IPomodoroService
                 TotalSeconds = 0,
                 IsCompleted = false,
                 PomodoroSessionId = session.Id,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
             });
         }
         
@@ -85,7 +85,7 @@ public class PomodoroService : IPomodoroService
         
         if(session == null || session.UserId != request.UserId) throw new ArgumentException("Session not found");
 
-        session.IsCompleted = request.IsComplete; 
+        session.IsCompleted = request.IsCompleted; 
         
         await _sessionRepository.Update(session, token);
     }
@@ -99,7 +99,7 @@ public class PomodoroService : IPomodoroService
         var session = await _sessionRepository.Get(round.PomodoroSessionId, token);
         if (session.UserId != request.UserId) throw new ArgumentException("Round not found");
 
-        round.IsCompleted = request.IsCompeted;
+        round.IsCompleted = request.IsCompleted;
         round.TotalSeconds = request.TotalSeconds;
         
         await _roundRepository.Update(round, token);

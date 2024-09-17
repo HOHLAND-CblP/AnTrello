@@ -4,6 +4,7 @@ using AnTrello.Backend.Domain.Contracts.Dtos.TaskService.UpdateTask;
 using AnTrello.Backend.Domain.Contracts.Repositories;
 using AnTrello.Backend.Domain.Contracts.Services;
 using AnTrello.Backend.Domain.Entities;
+using AnTrello.Backend.Domain.Entities.Jwt;
 
 namespace AnTrello.Backend.Domain.Services;
 
@@ -25,7 +26,8 @@ public class TaskService : ITaskService
             IsCompleted = request.IsCompleted,
             UserId = request.UserId,
             Priority = request.Priority,
-            CreatedAt = request.CreatedAt
+            CreatedAt = request.CreatedAt,
+            UpdatedAt = DateTime.UtcNow
         };
         
         var taskId = await _repository.Create(task, token);
@@ -65,10 +67,12 @@ public class TaskService : ITaskService
 
         task = new UserTask
         {
+            Id = task.Id,
             Name = request.Name ?? task.Name,
             IsCompleted = request.IsCompleted ?? task.IsCompleted,
             Priority = request.Priority ?? task.Priority,
             CreatedAt = request.CreatedAt ?? task.CreatedAt,
+            UpdatedAt = DateTime.UtcNow
         };
         
         

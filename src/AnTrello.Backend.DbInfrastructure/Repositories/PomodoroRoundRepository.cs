@@ -45,7 +45,7 @@ public class PomodoroRoundRepository: BasePgRepository, IPomodoroRoundRepository
             returning id;
             """;
 
-
+        
         await using var connection = await GetConnection();
 
         return (await connection.QueryAsync<long>(

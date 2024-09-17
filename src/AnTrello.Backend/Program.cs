@@ -30,7 +30,7 @@ class Program
             options.AddPolicy(name: MyAllowSpecificOrigins,
                 policy  =>
                 {
-                    policy.WithOrigins("http://localhost:3000");
+                    policy.WithOrigins("http://localhost:3000", "http://localhost:3001");
                     policy.AllowCredentials();
                     policy.AllowAnyMethod();
                     policy.AllowAnyHeader();

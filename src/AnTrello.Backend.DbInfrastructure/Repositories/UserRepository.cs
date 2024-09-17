@@ -1,4 +1,5 @@
 using AnTrello.Backend.DbInfrastructure.Settings;
+using AnTrello.Backend.Domain.Contracts.Dtos.UserService.Update;
 using Dapper;
 using AnTrello.Backend.Domain.Contracts.Repositories;
 using AnTrello.Backend.Domain.Entities;
@@ -84,35 +85,71 @@ public class UserRepository: BasePgRepository,  IUserRepository
             ))).FirstOrDefault();
     }
 
-    public async Task<User> UpdateUser(User user, CancellationToken token)
+    public async Task<User> UpdateUser(UpdateUserRequest request, CancellationToken token)
     {
         string sql =
             """
             UPDATE users
-                SET email = @Email,
-                    name = @Name,
-                    break_interval = @BreakInterval,
-                    intervals_count = @IntervalsCount,
-                    work_interval = @WorkInterval,
-                    updated_at = @UpdatedAt
-                WHERE id = @Id
-            returning *;
             """;
+        
+        var conditions = new List<string>();
+        var @params = new DynamicParameters();
+
+        if (request.Email != null)
+        {
+            conditions.Add("email = @Email");
+            @params.Add("@Email", request.Email);
+        }
+        if (request.Name != null)
+        {
+            conditions.Add("name = @Name");
+            @params.Add("@Name", request.Name);
+        }
+
+        if (request.Password != null)
+        {
+            conditions.Add("password = @Password");
+            @params.Add("@Password", request.Password);
+        }
+        if (request.BreakInterval != null)
+        {
+            conditions.Add("break_interval = @BreakInterval");
+            @params.Add("@BreakInterval", request.BreakInterval);
+        }
+        if (request.IntervalsCount != null)
+        {
+            conditions.Add("intervals_count = @IntervalsCount");
+            @params.Add("@IntervalsCount", request.IntervalsCount);
+        }
+        if (request.WorkInterval != null)
+        {
+            conditions.Add("work_interval = @WorkInterval");
+            @params.Add("@WorkInterval", request.WorkInterval);
+        }
+
+        if (conditions.Count == 0)
+            return null;
+        
+        conditions.Add("updated_at = @UpdatedAt");
+        @params.Add("@UpdatedAt", DateTime.UtcNow);
+        
+        sql += $"\nSET\n\t{string.Join(",\n\t", conditions)}";
+        
+        conditions = new List<string>();
+        
+        conditions.Add("WHERE id = @Id");
+        @params.Add("@Id", request.Id);
+
+        conditions.Add("returning id;");
+        sql += $"\n{string.Join("\n", conditions)}";
+        
         
         await using var connection = await GetConnection();
         
         return (await connection.QueryAsync<User>(
             new CommandDefinition(
                 sql,
-                new
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    Name = user.Name,
-                    BreakInterval = user.BreakInterval,
-                    IntervalsCount = user.IntervalsCount,
-                    UpdatedAt = user.UpdatedAt,
-                },
+                @params,
                 cancellationToken: token
             ))).FirstOrDefault();
     }

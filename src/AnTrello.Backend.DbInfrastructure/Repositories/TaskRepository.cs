@@ -19,8 +19,8 @@ public class TaskRepository : BasePgRepository, ITaskRepository
         string sql =
             """
             INSERT INTO tasks(
-                name, is_completed, user_id, priority, created_at)
-            VALUES (@Name, @IsCompleted, @UserId, @Priority, @CreatedAt)
+                name, is_completed, user_id, priority, created_at, updated_at)
+            VALUES (@Name, @IsCompleted, @UserId, @Priority, @CreatedAt, @UpdatedAt)
             returning id;
             """;
         
@@ -35,7 +35,8 @@ public class TaskRepository : BasePgRepository, ITaskRepository
                     IsCompleted = userTask.IsCompleted,
                     UserId = userTask.UserId,
                     Priority = userTask.Priority,
-                    CreatedAt = userTask.CreatedAt
+                    CreatedAt = userTask.CreatedAt,
+                    UpdatedAt = userTask.UpdatedAt
                 },
                 cancellationToken: token
             ))).FirstOrDefault();   
@@ -112,7 +113,7 @@ public class TaskRepository : BasePgRepository, ITaskRepository
     }
 
     
-    public async Task<List<UserTask>> GetTasksBeforeDate(long userId, DateOnly date, CancellationToken token)
+    public async Task<List<UserTask>> GetTasksBeforeDate(long userId, DateTime date, CancellationToken token)
     {
         string sql =
             """
@@ -145,7 +146,9 @@ public class TaskRepository : BasePgRepository, ITaskRepository
             SET name = @Name, 
                 is_completed = @IsCompleted,
                 priority = @Priority,
+                created_at = @CreatedAt,
                 updated_at = @UpdatedAt
+            WHERE id = @Id;
             """;
         
         await using var connection = await GetConnection();
@@ -155,9 +158,11 @@ public class TaskRepository : BasePgRepository, ITaskRepository
                 sql,
                 new
                 {
+                    Id = userTask.Id,
                     Name = userTask.Name,
                     IsCompleted = userTask.IsCompleted,
                     Priority = userTask.Priority,
+                    CreatedAt = userTask.CreatedAt,
                     UpdatedAt = userTask.UpdatedAt
                 },
                 cancellationToken: token
